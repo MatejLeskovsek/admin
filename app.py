@@ -18,11 +18,11 @@ docs = FlaskApiSpec(app, document_options=False)
 
 cors = CORS(app)
 service_name = "admin_core_service"
-service_ip = "35.190.119.123"
+service_ip = "admin-core-service"
 
-ecostreet_core_service = "35.190.119.123"
-database_core_service = "35.190.119.123"
-configuration_core_service = "35.190.119.123"
+ecostreet_core_service = "ecostreet-core-service"
+database_core_service = "database-core-service"
+configuration_core_service = "configuration-core-service"
 
 
 class NoneSchema(Schema):
