@@ -43,6 +43,35 @@ def hello_world():
 docs.register(hello_world)
 
 
+# ADD GAME
+@app.route("/adaddgame", methods=["POST"])
+@use_kwargs({'name': fields.Str(), 'date': fields.Str(), 'AccessToken':fields.Str()})
+@marshal_with(NoneSchema, description='200 OK', code=200)
+@marshal_with(NoneSchema, description='Something went wrong', code=500)
+def add_game():
+    try:
+        url = 'http://' + database_core_service + '/dbaddgame'
+        response = requests.post(url, data={'name':request.form["name"], 'date':request.form["date"], 'AccessToken':request.form["AccessToken"]})
+        return {"response": response.text}, 200
+    except:
+        return {"response": "Something went wrong."}, 500
+docs.register(hello_world)
+
+# REMOVE GAME
+@app.route("/adremovegame", methods=["POST"])
+@use_kwargs({'name': fields.Str(), 'AccessToken':fields.Str()})
+@marshal_with(NoneSchema, description='200 OK', code=200)
+@marshal_with(NoneSchema, description='Something went wrong', code=500)
+def remove_game():
+    try:
+        url = 'http://' + database_core_service + '/dbremovegame'
+        response = requests.post(url, data={'name':request.form["name"], 'AccessToken':request.form["AccessToken"]})
+        return {"response": response.text}, 200
+    except:
+        return {"response": "Something went wrong."}, 500
+docs.register(hello_world)
+
+
  
 # SERVICE IP UPDATE FUNCTION
 @app.route("/adupdate_ip", methods = ['POST'])
