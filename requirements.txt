@@ -1,0 +1,11 @@
+click==8.0.3
+flask==2.0.1
+itsdangerous==2.0.1
+Jinja2==3.0.2
+MarkupSafe==2.0.1
+Werkzeug==2.0.2
+pymongo==3.12.0
+requests==2.25.1
+flask-apispec==0.11.0
+openapi==1.1.0
+Flask-Cors==3.0.10
