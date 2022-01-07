@@ -55,7 +55,7 @@ def add_game():
         return {"response": response.text}, 200
     except:
         return {"response": "Something went wrong."}, 500
-docs.register(hello_world)
+docs.register(add_game)
 
 # REMOVE GAME
 @app.route("/adremovegame", methods=["POST"])
@@ -69,7 +69,7 @@ def remove_game():
         return {"response": response.text}, 200
     except:
         return {"response": "Something went wrong."}, 500
-docs.register(hello_world)
+docs.register(remove_game)
 
 
  
