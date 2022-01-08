@@ -8,6 +8,7 @@ from flask_apispec import use_kwargs, marshal_with
 from flask_apispec import FlaskApiSpec
 from marshmallow import Schema
 from flask_cors import CORS, cross_origin
+import sys
 
 app = Flask(__name__)
 app.config.update({
@@ -49,6 +50,7 @@ docs.register(hello_world)
 @marshal_with(NoneSchema, description='200 OK', code=200)
 @marshal_with(NoneSchema, description='Something went wrong', code=500)
 def add_game():
+    sys.stdout.write("Admin microservice: /adaddgame accessed\n")
     try:
         url = 'http://' + database_core_service + '/dbaddgame'
         response = requests.post(url, data={'name':request.form["name"], 'date':request.form["date"], 'AccessToken':request.form["AccessToken"]})
@@ -63,6 +65,7 @@ docs.register(add_game)
 @marshal_with(NoneSchema, description='200 OK', code=200)
 @marshal_with(NoneSchema, description='Something went wrong', code=500)
 def remove_game():
+    sys.stdout.write("Admin microservice: /adremovegame accessed\n")
     try:
         url = 'http://' + database_core_service + '/dbremovegame'
         response = requests.post(url, data={'name':request.form["name"], 'AccessToken':request.form["AccessToken"]})
@@ -85,7 +88,7 @@ def update_ip():
     global service_ip
     global service_name
     global users
-    print("/adupdate_ip accessed")
+    sys.stdout.write("Admin microservice: /adupdate_ip accessed\n")
     
     service_ip = request.form["ip"]
     
@@ -110,7 +113,7 @@ def config_update():
     global service_ip
     global service_name
     global users
-    print("/adconfig accessed")
+    sys.stdout.write("Admin microservice: /adconfig accessed\n")
     
     try:
         microservice = request.form["name"]
@@ -136,7 +139,7 @@ def get_config():
     global service_ip
     global service_name
     global users
-    print("/adgetconfig accessed")
+    sys.stdout.write("Admin microservice: /adgetconfig accessed\n")
     
     return {"response": str([ecostreet_core_service, configuration_core_service, database_core_service])}, 200
 docs.register(get_config)
@@ -146,7 +149,7 @@ docs.register(get_config)
 @marshal_with(NoneSchema, description='200 OK', code=200)
 @marshal_with(NoneSchema, description='METRIC CHECK FAIL', code=500)
 def get_health():
-    print("/admetrics accessed")
+    sys.stdout.write("Admin microservice: /admetrics accessed\n")
     start = datetime.datetime.now()
     try:
         url = 'http://' + database_core_service + '/cfhealthcheck'
@@ -175,7 +178,7 @@ docs.register(get_health)
 @app.route("/adhealthcheck")
 @marshal_with(NoneSchema, description='200 OK', code=200)
 def send_health():
-    print("/adhealthcheck accessed")
+    sys.stdout.write("Admin microservice: /adhealthcheck accessed\n")
     try:
         url = 'http://' + ecostreet_core_service + '/lg'
         response = requests.get(url)
