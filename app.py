@@ -22,6 +22,7 @@ service_name = "admin_core_service"
 service_ip = "admin-core-service"
 
 ecostreet_core_service = "ecostreet-core-service"
+play_core_service = "play-core-service"
 database_core_service = "database-core-service"
 configuration_core_service = "configuration-core-service"
 
@@ -94,7 +95,7 @@ def update_ip():
     global database_core_service
     global service_ip
     global service_name
-    global users
+    
     sys.stdout.write("Admin microservice: /adupdate_ip accessed\n")
     
     service_ip = request.form["ip"]
@@ -117,9 +118,10 @@ def config_update():
     global ecostreet_core_service
     global configuration_core_service
     global database_core_service
+    global play_core_service
     global service_ip
     global service_name
-    global users
+    
     sys.stdout.write("Admin microservice: /adconfig accessed\n")
     
     try:
@@ -131,6 +133,8 @@ def config_update():
             ecostreet_core_service = ms_ip
         if microservice == "configuration_core_service":
             configuration_core_service = ms_ip
+        if microservice == "play_core_service":
+            play_core_service = ms_ip
         return {"response": "200 OK"}, 200
     except Exception as err:
         return {"response": "Something went wrong."}, 500
