@@ -12,8 +12,8 @@ import sys
 
 app = Flask(__name__)
 app.config.update({
-    'APISPEC_SWAGGER_URL': '/dbopenapi',
-    'APISPEC_SWAGGER_UI_URL': '/dbswaggerui'
+    'APISPEC_SWAGGER_URL': '/adopenapi',
+    'APISPEC_SWAGGER_UI_URL': '/adswaggerui'
 })
 docs = FlaskApiSpec(app, document_options=False)
 
