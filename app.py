@@ -125,8 +125,8 @@ def config_update():
     sys.stdout.write("Admin microservice: /adconfig accessed\n")
     
     try:
-        microservice = request.form["name"]
-        ms_ip = request.form["ip"]
+        microservice = str(request.form["name"])
+        ms_ip = str(request.form["ip"])
         if microservice == "database_core_service":
             database_core_service = ms_ip
         if microservice == "ecostreet_core_service":
@@ -147,12 +147,13 @@ def get_config():
     global ecostreet_core_service
     global configuration_core_service
     global database_core_service
+    global play_core_service
     global service_ip
     global service_name
     global users
     sys.stdout.write("Admin microservice: /adgetconfig accessed\n")
     
-    return {"response": str([ecostreet_core_service, configuration_core_service, database_core_service])}, 200
+    return {"response": str([ecostreet_core_service, configuration_core_service, database_core_service, play_core_service])}, 200
 docs.register(get_config)
 
 # METRICS FUNCTION
