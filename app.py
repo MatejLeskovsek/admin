@@ -10,6 +10,10 @@ from marshmallow import Schema
 from flask_cors import CORS, cross_origin
 import sys
 
+import logging
+import socket
+from logging.handlers import SysLogHandler
+
 app = Flask(__name__)
 app.config.update({
     'APISPEC_SWAGGER_URL': '/adopenapi',
@@ -26,6 +30,21 @@ play_core_service = "play-core-service"
 database_core_service = "database-core-service"
 configuration_core_service = "configuration-core-service"
 
+
+class ContextFilter(logging.Filter):
+    hostname = socket.gethostname()
+    def filter(self, record):
+        record.hostname = ContextFilter.hostname
+        return True
+
+syslog = SysLogHandler(address=('logs3.papertrailapp.com', 17630))
+syslog.addFilter(ContextFilter())
+format = '%(asctime)s %(hostname)s TimeProject: %(message)s'
+formatter = logging.Formatter(format, datefmt='%b %d %H:%M:%S')
+syslog.setFormatter(formatter)
+logger = logging.getLogger()
+logger.addHandler(syslog)
+logger.setLevel(logging.INFO)
 
 class NoneSchema(Schema):
     response = fields.Str()
@@ -58,12 +77,14 @@ docs.register(hello_world)
 @marshal_with(NoneSchema, description='200 OK', code=200)
 @marshal_with(NoneSchema, description='Something went wrong', code=500)
 def add_game():
-    sys.stdout.write("Admin microservice: /adaddgame accessed\n")
+    logger.info("Admin microservice: /adaddgame accessed\n")
     try:
         url = 'http://' + database_core_service + '/dbaddgame'
         response = requests.post(url, data={'name':request.form["name"], 'date':request.form["date"], 'AccessToken':request.form["AccessToken"]})
+        logger.info("Admin microservice: /adaddgame finished\n")
         return {"response": response.text}, 200
     except:
+        logger.info("Admin microservice: /adaddgame hit an error\n")
         return {"response": "Something went wrong."}, 500
 docs.register(add_game)
 
@@ -73,12 +94,15 @@ docs.register(add_game)
 @marshal_with(NoneSchema, description='200 OK', code=200)
 @marshal_with(NoneSchema, description='Something went wrong', code=500)
 def remove_game():
-    sys.stdout.write("Admin microservice: /adremovegame accessed\n")
+    logger.info("Admin microservice: /adremovegame accessed\n")
     try:
         url = 'http://' + database_core_service + '/dbremovegame'
         response = requests.post(url, data={'name':request.form["name"], 'AccessToken':request.form["AccessToken"]})
+        
+        logger.info("Admin microservice: /adremovegame finished\n")
         return {"response": response.text}, 200
     except:
+        logger.info("Admin microservice: /adremovegame hit an error\n")
         return {"response": "Something went wrong."}, 500
 docs.register(remove_game)
 
@@ -95,8 +119,7 @@ def update_ip():
     global database_core_service
     global service_ip
     global service_name
-    
-    sys.stdout.write("Admin microservice: /adupdate_ip accessed\n")
+    logger.info("Admin microservice: /adupdate_ip accessed\n")
     
     service_ip = request.form["ip"]
     
@@ -104,8 +127,10 @@ def update_ip():
     try:
         url = 'http://' + configuration_core_service + '/cfupdate'
         response = requests.post(url, data=data)
+        logger.info("Admin microservice: /adupdate_ip finished\n")
         return {"response": response.text}, 200
     except:
+        logger.info("Admin microservice: /adupdate_ip hit an error\n")
         return {"response": "Something went wrong."}, 500
 docs.register(update_ip)
 
@@ -121,8 +146,7 @@ def config_update():
     global play_core_service
     global service_ip
     global service_name
-    
-    sys.stdout.write("Admin microservice: /adconfig accessed\n")
+    logger.info("Admin microservice: /adconfig accessed\n")
     
     try:
         microservice = str(request.form["name"])
@@ -135,8 +159,10 @@ def config_update():
             configuration_core_service = ms_ip
         if microservice == "play_core_service":
             play_core_service = ms_ip
+        logger.info("Admin microservice: /adconfig finished\n")
         return {"response": "200 OK"}, 200
     except Exception as err:
+        logger.info("Admin microservice: /adconfig hit an error\n")
         return {"response": "Something went wrong."}, 500
 docs.register(config_update)
 
@@ -150,8 +176,9 @@ def get_config():
     global play_core_service
     global service_ip
     global service_name
-    global users
-    sys.stdout.write("Admin microservice: /adgetconfig accessed\n")
+    
+    logger.info("Admin microservice: /adgetconfig accessed\n")
+    logger.info("Admin microservice: /adgetconfig finished\n")
     
     return {"response": str([ecostreet_core_service, configuration_core_service, database_core_service, play_core_service])}, 200
 docs.register(get_config)
@@ -161,12 +188,13 @@ docs.register(get_config)
 @marshal_with(NoneSchema, description='200 OK', code=200)
 @marshal_with(NoneSchema, description='METRIC CHECK FAIL', code=500)
 def get_health():
-    sys.stdout.write("Admin microservice: /admetrics accessed\n")
+    logger.info("Admin microservice: /admetrics accessed\n")
     start = datetime.datetime.now()
     try:
         url = 'http://' + database_core_service + '/cfhealthcheck'
         response = requests.get(url)
     except Exception as err:
+        logger.info("Admin microservice: /admetrics hit an error\n")
         return {"response": "METRIC CHECK FAIL: configuration unavailable"}, 500
     end = datetime.datetime.now()
     
@@ -175,6 +203,7 @@ def get_health():
         url = 'http://' + ecostreet_core_service + '/lghealthcheck'
         response = requests.get(url)
     except Exception as err:
+        logger.info("Admin microservice: /admetrics hit an error\n")
         return {"response": "METRIC CHECK FAIL: login service unavailable"}, 500
     end2 = datetime.datetime.now()
     
@@ -183,6 +212,7 @@ def get_health():
     delta2 = end2-start2
     lrt = delta2.total_seconds() * 1000
     health = {"metric check": "successful", "database response time": crt, "login response time": lrt}
+    logger.info("Admin microservice: /admetrics finished\n")
     return {"response": str(health)}, 200
 docs.register(get_health)
 
@@ -190,7 +220,7 @@ docs.register(get_health)
 @app.route("/adhealthcheck")
 @marshal_with(NoneSchema, description='200 OK', code=200)
 def send_health():
-    sys.stdout.write("Admin microservice: /adhealthcheck accessed\n")
+    logger.info("Admin microservice: /adhealthcheck accessed\n")
     try:
         url = 'http://' + ecostreet_core_service + '/lg'
         response = requests.get(url)
@@ -199,6 +229,8 @@ def send_health():
         url = 'http://' + database_core_service + '/db'
         response = requests.get(url)
     except Exception as err:
+        logger.info("Admin microservice: /adhealthcheck hit an error\n")
         return {"response": "Healthcheck fail: depending services unavailable"}, 500
+    logger.info("Admin microservice: /adhealthcheck failed\n")
     return {"response": "200 OK"}, 200
 docs.register(send_health)
