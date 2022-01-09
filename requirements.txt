@@ -9,3 +9,4 @@ requests==2.25.1
 flask-apispec==0.11.0
 openapi==1.1.0
 Flask-Cors==3.0.10
+circuitbreaker==1.3.2

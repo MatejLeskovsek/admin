@@ -9,7 +9,7 @@ from flask_apispec import FlaskApiSpec
 from marshmallow import Schema
 from flask_cors import CORS, cross_origin
 import sys
-
+from circuitbreaker import circuit
 import logging
 import socket
 from logging.handlers import SysLogHandler
@@ -59,6 +59,7 @@ def not_found(e):
 # HEALTH PAGE
 @app.route("/")
 @marshal_with(NoneSchema, description='200 OK', code=200)
+@circuit(failure_threshold=1, recovery_timeout=10, fallback_function=not_found("circuit_break"))
 def health():
     return {"response": "200"}, 200
 docs.register(health)
@@ -66,6 +67,7 @@ docs.register(health)
 # HOME PAGE
 @app.route("/ad")
 @marshal_with(NoneSchema, description='200 OK', code=200)
+@circuit(failure_threshold=1, recovery_timeout=10, fallback_function=not_found("circuit_break"))
 def hello_world():
     return {"response": "Admin microservice."}, 200
 docs.register(hello_world)
@@ -76,6 +78,7 @@ docs.register(hello_world)
 @use_kwargs({'name': fields.Str(), 'date': fields.Str(), 'AccessToken':fields.Str()})
 @marshal_with(NoneSchema, description='200 OK', code=200)
 @marshal_with(NoneSchema, description='Something went wrong', code=500)
+@circuit(failure_threshold=1, recovery_timeout=10, fallback_function=not_found("circuit_break"))
 def add_game():
     logger.info("Admin microservice: /adaddgame accessed\n")
     try:
@@ -93,6 +96,7 @@ docs.register(add_game)
 @use_kwargs({'name': fields.Str(), 'AccessToken':fields.Str()})
 @marshal_with(NoneSchema, description='200 OK', code=200)
 @marshal_with(NoneSchema, description='Something went wrong', code=500)
+@circuit(failure_threshold=1, recovery_timeout=10, fallback_function=not_found("circuit_break"))
 def remove_game():
     logger.info("Admin microservice: /adremovegame accessed\n")
     try:
@@ -113,6 +117,7 @@ docs.register(remove_game)
 @use_kwargs({'name': fields.Str(), 'ip': fields.Str()})
 @marshal_with(NoneSchema, description='200 OK', code=200)
 @marshal_with(NoneSchema, description='Something went wrong', code=500)
+@circuit(failure_threshold=1, recovery_timeout=10, fallback_function=not_found("circuit_break"))
 def update_ip():
     global ecostreet_core_service
     global configuration_core_service
@@ -139,6 +144,7 @@ docs.register(update_ip)
 @use_kwargs({'name': fields.Str(), 'ip': fields.Str()})
 @marshal_with(NoneSchema, description='200 OK', code=200)
 @marshal_with(NoneSchema, description='Something went wrong', code=500)
+@circuit(failure_threshold=1, recovery_timeout=10, fallback_function=not_found("circuit_break"))
 def config_update():
     global ecostreet_core_service
     global configuration_core_service
@@ -169,6 +175,7 @@ docs.register(config_update)
 # FUNCTION TO GET CURRENT CONFIG
 @app.route("/adgetconfig")
 @marshal_with(NoneSchema, description='200 OK', code=200)
+@circuit(failure_threshold=1, recovery_timeout=10, fallback_function=not_found("circuit_break"))
 def get_config():
     global ecostreet_core_service
     global configuration_core_service
@@ -187,6 +194,7 @@ docs.register(get_config)
 @app.route("/admetrics")
 @marshal_with(NoneSchema, description='200 OK', code=200)
 @marshal_with(NoneSchema, description='METRIC CHECK FAIL', code=500)
+@circuit(failure_threshold=1, recovery_timeout=10, fallback_function=not_found("circuit_break"))
 def get_health():
     logger.info("Admin microservice: /admetrics accessed\n")
     start = datetime.datetime.now()
@@ -219,6 +227,7 @@ docs.register(get_health)
 # HEALTH CHECK
 @app.route("/adhealthcheck")
 @marshal_with(NoneSchema, description='200 OK', code=200)
+@circuit(failure_threshold=1, recovery_timeout=10, fallback_function=not_found("circuit_break"))
 def send_health():
     logger.info("Admin microservice: /adhealthcheck accessed\n")
     try:
